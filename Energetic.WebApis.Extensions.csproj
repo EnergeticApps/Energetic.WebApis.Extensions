@@ -32,6 +32,9 @@
 	<ItemGroup>
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
 		<PackageReference Include="Ben.Demystifier" Version="0.3.0" />
+		<PackageReference Include="Energetic" Version="0.0.3-alpha" />
+		<PackageReference Include="Energetic.Persistence" Version="0.0.1-alpha" />
+		<PackageReference Include="Energetic.ValueObjects" Version="0.0.1-alpha" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="9.5.2" />
 		<PackageReference Include="Hellang.Middleware.ProblemDetails" Version="5.1.1" />
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
@@ -54,12 +57,6 @@
 		<PackageReference Include="Scrutor.AspNetCore" Version="3.3.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.0.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.0.4" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Energetic.Persistence\Energetic.Persistence.csproj" />
-		<ProjectReference Include="..\Energetic.ValueObjects\Energetic.ValueObjects.csproj" />
-		<ProjectReference Include="..\Energetic\Energetic.csproj" />
 	</ItemGroup>
 
 
