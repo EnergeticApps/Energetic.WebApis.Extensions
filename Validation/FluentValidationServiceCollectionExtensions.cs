@@ -15,10 +15,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMvc()
                 .AddFluentValidation(configuration => configuration.RegisterValidatorsFromAssemblies(assemblies));
 
-            return services.AddTransientGenericValidators();
+            return services.AddTransientGenericValidationBehaviours();
         }
 
-        private static IServiceCollection AddTransientGenericValidators(this IServiceCollection services)
+        private static IServiceCollection AddTransientGenericValidationBehaviours(this IServiceCollection services)
         {
             return services.AddTransient(typeof(IValidationBehaviour<,>), typeof(ValidationBehaviour<,>));
         }
@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMvcCore()
                 .AddFluentValidation(configuration => configuration.RegisterValidatorsFromAssemblies(assemblies));
 
-            return services.AddTransientGenericValidators();
+            return services.AddTransientGenericValidationBehaviours();
         }
 
         public static IServiceCollection AddFluentValidationAndRegisterValidatorsFromAssemblies(this IServiceCollection services, params Type[] validatorMarkerTypes)
@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddControllers()
                 .AddFluentValidation(configuration => configuration.RegisterValidatorsFromAssemblies(assemblies));
 
-            return services.AddTransientGenericValidators();
+            return services.AddTransientGenericValidationBehaviours();
         }
     }
 }
