@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Ben.Demystifier
 {
+    /// <summary>
+    /// TODO: Make this work
+    /// </summary>
     public class DemystifierMiddleware
     {
         private readonly RequestDelegate _next;
