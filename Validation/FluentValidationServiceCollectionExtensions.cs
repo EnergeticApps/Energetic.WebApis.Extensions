@@ -4,6 +4,7 @@ using System;
 using Energetic.Reflection;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -18,11 +19,6 @@ namespace Microsoft.Extensions.DependencyInjection
             return services.AddTransientGenericValidationBehaviours();
         }
 
-        private static IServiceCollection AddTransientGenericValidationBehaviours(this IServiceCollection services)
-        {
-            return services.AddTransient(typeof(IValidationBehaviour<,>), typeof(ValidationBehaviour<,>));
-        }
-
         public static IServiceCollection AddMvcCoreWithFluentValidationAndValidatorsFromAssemblies(this IServiceCollection services, params Type[] validatorMarkerTypes)
         {
             var assemblies = validatorMarkerTypes.GetContainingAssemblies();
@@ -32,13 +28,22 @@ namespace Microsoft.Extensions.DependencyInjection
             return services.AddTransientGenericValidationBehaviours();
         }
 
-        public static IServiceCollection AddFluentValidationAndRegisterValidatorsFromAssemblies(this IServiceCollection services, params Type[] validatorMarkerTypes)
+        public static IServiceCollection AddControllersWithFluentValidationAndRegisterValidatorsFromAssemblies(this IServiceCollection services, params Type[] validatorMarkerTypes)
         {
+            services.AddTransientGenericValidationBehaviours();
+
             var assemblies = validatorMarkerTypes.GetContainingAssemblies();
+
             services.AddControllers()
                 .AddFluentValidation(configuration => configuration.RegisterValidatorsFromAssemblies(assemblies));
 
-            return services.AddTransientGenericValidationBehaviours();
+            return services;
+        }
+
+
+        private static IServiceCollection AddTransientGenericValidationBehaviours(this IServiceCollection services)
+        {
+            return services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
         }
     }
 }
