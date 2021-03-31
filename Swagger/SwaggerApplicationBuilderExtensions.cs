@@ -13,7 +13,9 @@ namespace Microsoft.AspNetCore.Builder
             {
                 app.UseSwaggerUI(s =>
                 {
-                    s.SwaggerEndpoint($"/swagger/{api.Version.ToLowerInvariant()}/swagger.json", api.Title);
+                    string apiVersion = api.Version.ToLowerInvariant();
+                    string apiTitle = api.Title;
+                    s.SwaggerEndpoint($"/swagger/{apiVersion}/swagger.json", apiTitle);
                 });
             }
 
