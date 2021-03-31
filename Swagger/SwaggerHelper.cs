@@ -1,15 +1,7 @@
-﻿using Energetic.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
-using Energetic.ValueObjects;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Linq;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Energetic.WebApis;
+﻿using Energetic.WebApis;
 using Microsoft.Extensions.Configuration;
+using Microsoft.OpenApi.Models;
+using System.Collections.Generic;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
