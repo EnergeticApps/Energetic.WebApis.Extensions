@@ -4,7 +4,7 @@ using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class RespositoriesServiceCollectionExtensions
+    public static class RepositoriesServiceCollectionExtensions
     {
         private static Type s_readSideRepositoryGenericInterface = typeof(IReadSideRepository<>);
         private static Type s_writeSideRepositoryGenericInterface = typeof(IWriteSideRepository<,>);
@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services.Scan(action => action
             .FromAssembliesOf(readSideRepositoryMarkerTypes)
             .AddClasses(classes => classes.AssignableTo(s_readSideRepositoryGenericInterface))
-            .AsMatchingInterface()
+            .AsImplementedInterfaces()
             .WithScopedLifetime());
         }
 
@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services.Scan(action => action
                 .FromAssembliesOf(writeSideRepositoryMarkerTypes)
                 .AddClasses(classes => classes.AssignableTo(s_writeSideRepositoryGenericInterface))
-                .AsMatchingInterface()
+                .AsImplementedInterfaces()
                 .WithScopedLifetime());
         }
     }
