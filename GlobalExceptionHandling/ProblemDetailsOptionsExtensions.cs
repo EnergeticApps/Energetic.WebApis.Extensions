@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using Energetic.Security;
+using Energetic.Security.Exceptions;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +28,12 @@ namespace Hellang.Middleware.ProblemDetails
 
         public static ProblemDetailsOptions AddSecurityProblemDetailsExceptionMapping(this ProblemDetailsOptions options)
         {
+            /* The 402 code is named "Unauthorized" in the HTTP specification, but the description of the code makes it
+             * clear that it means "not authenticated". For a true "unauthorized response, use status code 403 - Forbidden. */
             options.Map<InvalidCredentialException>(ex => new StatusCodeProblemDetails(StatusCodes.Status401Unauthorized));
+
+            options.Map<NotAuthenticatedException>(ex => new StatusCodeProblemDetails(StatusCodes.Status401Unauthorized));
+            options.Map<NotAuthorizedException>(ex => new StatusCodeProblemDetails(StatusCodes.Status401Unauthorized));
             return options;
         }
 

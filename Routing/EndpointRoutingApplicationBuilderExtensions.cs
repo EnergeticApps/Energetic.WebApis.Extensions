@@ -9,7 +9,8 @@ namespace Microsoft.AspNetCore.Builder
         {
             return app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers()
+                .RequireAuthorization("ApiScope"); // TODO: is this the best place for this line of code? Shouldn't it be moved somewhere to do with authorization?
                 endpoints.MapFallBack();
             });
         }
