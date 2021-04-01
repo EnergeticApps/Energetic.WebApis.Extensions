@@ -14,13 +14,20 @@ namespace Microsoft.Extensions.DependencyInjection
         //TODO: Make this work
         public static IServiceCollection AddVersioning(this IServiceCollection services)
         {
-            var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
-            services.Configure<List<OpenApiInfo>>(configuration.GetSection(ConfigurationKeys.ApiVersionsAppSettingsKey));
-
-            services.AddApiVersioning(a =>
+            services.AddApiVersioning(options =>
             {
-                a.AssumeDefaultVersionWhenUnspecified = true;
-                a.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            });
+
+            services.AddVersionedApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
             });
 
             return services;

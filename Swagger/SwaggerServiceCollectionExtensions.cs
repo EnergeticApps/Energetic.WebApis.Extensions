@@ -1,65 +1,55 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class SwaggerServiceCollectionExtensions
-    {      
-        public static IServiceCollection AddSwaggerGenForEveryApiVersion(this IServiceCollection services, IConfiguration configuration, params Type[] valueObjectMarkerTypes)
+    {
+        public static IServiceCollection AddSwagger(this IServiceCollection services, params Type[] valueObjectAssemblyMarkerTypes)
         {
-            // TODO: This method is so ugly. Refactor.
+            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerGenOptions>();
+            services.AddTransient<IConfigureOptions<SwaggerUIOptions>, ConfigureSwaggerUIOptions>();
+            services.MapValueObjectsToSwaggerPrimitiveSchemaTypes(valueObjectAssemblyMarkerTypes);
+            services.AddSwaggerGen();
 
-            services.MapValueObjectsToPrimitiveSchemaTypes(valueObjectMarkerTypes);
 
-            var apis = SwaggerHelper.GetApiVersions(configuration);
+            //c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            //{
+            //    Description = @"JWT Authorization header using the Bearer scheme. <br />
+            //          Enter 'Bearer' [space] and then your token in the text input below.
+            //          <br />Example: 'Bearer 12345abcdef'",
+            //    Name = "Authorization",
+            //    In = ParameterLocation.Header,
+            //    Type = SecuritySchemeType.ApiKey,
+            //    Scheme = "Bearer"
+            //});
+            //c.AddSecurityRequirement(
+            //    new OpenApiSecurityRequirement()
+            //    {
+            //            {
+            //                new OpenApiSecurityScheme
+            //                {
+            //                    Reference = new OpenApiReference
+            //                    {
+            //                        Type = ReferenceType.SecurityScheme,
+            //                        Id = "Bearer"
+            //                    },
+            //                    Scheme = "oauth2",
+            //                    Name = "Bearer",
+            //                    In = ParameterLocation.Header,
+            //                },
+            //                new List<string>()
+            //            }
+            //    });
 
-            services.AddSwaggerGen(c =>
-            {
-                c.IncludeXmlComments();
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = @"JWT Authorization header using the Bearer scheme. <br />
-                          Enter 'Bearer' [space] and then your token in the text input below.
-                          <br />Example: 'Bearer 12345abcdef'",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
-                });
-                c.AddSecurityRequirement(
-                    new OpenApiSecurityRequirement()
-                    {
-                            {
-                                new OpenApiSecurityScheme
-                                {
-                                    Reference = new OpenApiReference
-                                    {
-                                        Type = ReferenceType.SecurityScheme,
-                                        Id = "Bearer"
-                                    },
-                                    Scheme = "oauth2",
-                                    Name = "Bearer",
-                                    In = ParameterLocation.Header,
-                                },
-                                new List<string>()
-                            }
-                    });
-
-                foreach (OpenApiInfo api in SwaggerHelper.GetApiVersions(configuration))
-                {
-                    c.SwaggerDoc(api.Version.ToLowerInvariant(), api);
-                }
-            });
 
             return services;
         }
 
-        private static void MapValueObjectsToPrimitiveSchemaTypes(this IServiceCollection services, params Type[] markerTypes)
+        public static void MapValueObjectsToSwaggerPrimitiveSchemaTypes(this IServiceCollection services, params Type[] markerTypes)
         {
             var assemblies = markerTypes.GetContainingAssemblies();
             var valueObjectTypes = assemblies.GetConcreteTypes().GetValueObjectTypes();
@@ -68,34 +58,12 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 foreach (var valueObjectType in valueObjectTypes)
                 {
-                    Type valueObjectBaseType = valueObjectType.GetValueObjectBaseType();
-                    Type primitiveType = valueObjectBaseType.GenericTypeArguments[1];
+                    Type baseType = valueObjectType.GetValueObjectBaseType();
+                    Type primitiveType = baseType.GenericTypeArguments[1];
 
                     c.MapType(valueObjectType, () => GetEquivalentOpenApiSchema(primitiveType));
                 }
             });
-        }
-
-        private static void IncludeXmlComments(this SwaggerGenOptions options)
-        {
-            var entryAssembly = Assembly.GetEntryAssembly();
-
-            if (entryAssembly is { })
-            {
-                var xmlFile = $"{entryAssembly.GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-
-                try
-                {
-                    options.IncludeXmlComments(xmlPath);
-                }
-                catch (FileNotFoundException ex)
-                {
-                    throw new InvalidOperationException($"Couldn't find the XML documentation file at {xmlPath}. Ensure that XML documentation " +
-                        $"is enabled in the project and that the path is set in the \"XML documentation file\" field of the \"Output\" section " +
-                        $"of your project's \"Build\" settings.", ex);
-                }
-            }
         }
 
         private static OpenApiSchema GetEquivalentOpenApiSchema(Type dotNetType)
