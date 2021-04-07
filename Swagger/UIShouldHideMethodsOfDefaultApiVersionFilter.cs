@@ -1,6 +1,4 @@
 ﻿using Microsoft.OpenApi.Models;
-using System;
-using System.Linq;
 
 namespace Swashbuckle.AspNetCore.SwaggerGen
 {
@@ -9,7 +7,7 @@ namespace Swashbuckle.AspNetCore.SwaggerGen
     /// displaying the default (unversioned) endpoints and only shows the versioned ones. This allows us to permit calls to API endpoints without
     /// specificying a version, while not cluttering up the Swagger UI with duplicate routes.
     /// </summary>
-    public class DontDisplayMethodsOfDefaultApiVersionFilter : IDocumentFilter
+    public class UIShouldHideMethodsOfDefaultApiVersionFilter : IDocumentFilter
     {
         public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
         {
@@ -22,7 +20,7 @@ namespace Swashbuckle.AspNetCore.SwaggerGen
 
                 if (!isSpecificVersion)
                 {
-                    var route = "/" + endpoint.RelativePath.TrimEnd('/');
+                    var route = "/" + endpoint.RelativePath.TrimEnd('/').ToLowerInvariant();
                     swaggerDoc.Paths.Remove(route);
                 }
             }

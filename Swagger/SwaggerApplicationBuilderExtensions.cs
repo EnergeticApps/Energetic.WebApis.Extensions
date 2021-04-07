@@ -6,7 +6,7 @@ namespace Microsoft.AspNetCore.Builder
 {
     public static class SwaggerApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UseSwagger(this IApplicationBuilder app)
+        public static IApplicationBuilder UseSwaggerWithSwaggerUI(this IApplicationBuilder app)
         {
             app.UseSwagger();
             app.UseSwaggerUI();
