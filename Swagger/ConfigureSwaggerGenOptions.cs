@@ -1,8 +1,10 @@
 ﻿using Energetic.WebApis;
 using Energetic.WebApis.Extensions;
 using IdentityModel.Client;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
@@ -30,7 +32,8 @@ namespace Microsoft.Extensions.Options
             IHttpClientFactory httpClientFactory,
             IOptions<OpenApiInfo> apiInfoAccessor,
             IOptions<SecurityOptions> swaggerUIClientSettings,
-            IAssemblyMarkerTypes assemblyMarkerTypes)
+            IAssemblyMarkerTypes assemblyMarkerTypes,
+            IWebHostEnvironment environment)
         {
             _apiVersionDescriptionProvider = apiVersionDescriptionProvider ?? throw new ArgumentNullException(nameof(apiVersionDescriptionProvider));
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
@@ -43,9 +46,15 @@ namespace Microsoft.Extensions.Options
 
             _swaggerUIClientSettings = swaggerUIClientSettings.Value ?? throw new ArgumentNullException(nameof(swaggerUIClientSettings));
 
-            if (_swaggerUIClientSettings?.Jwt is null || string.IsNullOrWhiteSpace(_swaggerUIClientSettings.Jwt?.Authority))
-                throw new InvalidOperationException("No JWT information (such as Authority etc.) has been passed." +
-                    "Maybe it is missing from the configuration file or not registered in the dependency injection container.");
+            // We don't ensure that valid JWT information (such as Authority etc.) has been passed at this stage.
+            // If it has not, we simply won't configure the Swagger UI to authenticate endpoint calls.
+
+            bool isDevelopmentEnvironment = environment.IsDevelopment();
+
+            if (_swaggerUIClientSettings.Jwt is null && !isDevelopmentEnvironment)
+            {
+                throw new InvalidOperationException("No JWT information (such as Authority etc.) has been passed. Maybe it is missing from the configuration file or not registered in the dependency injection container.");
+            }
         }
 
 
@@ -55,8 +64,16 @@ namespace Microsoft.Extensions.Options
             MapValueObjectsToSwaggerPrimitiveSchemaTypes(options, _assemblyMarkerTypes.ValueObjects);
             IncludeXmlComments(options);
             ApplyAestheticImprovements(options);
-            AddSecurity(options);
+            AddSecurityIfJwtConfigured(options);
             AddVersions(options);
+        }
+
+        private void AddSecurityIfJwtConfigured(SwaggerGenOptions options)
+        {
+            if (!string.IsNullOrWhiteSpace(_swaggerUIClientSettings.Jwt?.Authority))
+            {
+                AddSecurity(options);
+            }
         }
 
         private void MapValueObjectsToSwaggerPrimitiveSchemaTypes(SwaggerGenOptions options, params Type[] markerTypes)
@@ -179,38 +196,19 @@ namespace Microsoft.Extensions.Options
 
         private static (string schema, string? format) GetOpenApiSchemaTypeClosestTo(Type primitiveType)
         {
-            switch (primitiveType)
+            return primitiveType switch
             {
-                case Type type when type == typeof(int):
-                    return ("integer", "int32");
-
-                case Type type when type == typeof(long):
-                    return ("integer", "int64");
-
-                case Type type when type == typeof(decimal):
-                    return ("number", "float");
-
-                case Type type when type == typeof(double):
-                    return ("number", "double");
-
-                case Type type when type == typeof(string):
-                    return ("string", null);
-
-                case Type type when type == typeof(Guid):
-                    return ("string", null);
-
-                case Type type when type == typeof(bool):
-                    return ("boolean", null);
-
-                case Type type when type == typeof(DateTime):
-                    return ("string", "date-time");
-
-                case Type type when type == typeof(DateTimeOffset):
-                    return ("string", "date-time");
-
-                default:
-                    throw new NotSupportedException($"Don't know which OpenApi primitive type schema is closest to {primitiveType.Name}.");
-            }
+                Type type when type == typeof(int) => ("integer", "int32"),
+                Type type when type == typeof(long) => ("integer", "int64"),
+                Type type when type == typeof(decimal) => ("number", "float"),
+                Type type when type == typeof(double) => ("number", "double"),
+                Type type when type == typeof(string) => ("string", null),
+                Type type when type == typeof(Guid) => ("string", null),
+                Type type when type == typeof(bool) => ("boolean", null),
+                Type type when type == typeof(DateTime) => ("string", "date-time"),
+                Type type when type == typeof(DateTimeOffset) => ("string", "date-time"),
+                _ => throw new NotSupportedException($"Don't know which OpenApi primitive type schema is closest to {primitiveType.Name}."),
+            };
         }
     }
 }

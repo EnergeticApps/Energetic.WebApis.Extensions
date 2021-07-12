@@ -11,6 +11,7 @@
             {
                 configurePolicy.AllowAnyOrigin();
                 configurePolicy.AllowAnyMethod();
+                configurePolicy.AllowAnyHeader();
             }));
         }
     }

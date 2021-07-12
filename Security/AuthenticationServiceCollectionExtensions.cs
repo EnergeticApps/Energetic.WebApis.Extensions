@@ -1,21 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using FluentValidation.AspNetCore;
-using System;
-using Energetic.Reflection;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Energetic.Security;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+﻿using Energetic.WebApis;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection.Authorization;
-using Energetic.WebApis.Extensions;
-using Energetic.WebApis;
-using System.Net.Http;
+using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
+using System;
+using System.Net.Http;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -45,7 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
-                // Retry five times after delay  
+                // Retry five times after delay
                 .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(1));
         }
     }

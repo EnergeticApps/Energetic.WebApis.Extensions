@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
@@ -17,7 +19,8 @@ namespace Microsoft.Extensions.Options
         public ConfigureSwaggerUIOptions(
             IApiVersionDescriptionProvider versionDescriptionProvider,
             IOptions<OpenApiInfo> apiInfoAccessor,
-            IOptions<SecurityOptions> securitySettings)
+            IOptions<SecurityOptions> securitySettings, 
+            IWebHostEnvironment environment)
         {
             _apiInfo = apiInfoAccessor.Value ?? throw new ArgumentNullException(nameof(apiInfoAccessor));
 
@@ -28,9 +31,10 @@ namespace Microsoft.Extensions.Options
             _provider = versionDescriptionProvider ?? throw new ArgumentNullException(nameof(versionDescriptionProvider));
 
             _securitySettings = securitySettings.Value ?? throw new ArgumentNullException(nameof(securitySettings));
+            bool isDevelopmentEnvironment = environment.IsDevelopment();
 
-            if (_securitySettings?.Jwt is null || string.IsNullOrWhiteSpace(_securitySettings.Jwt?.Authority))
-                throw new InvalidOperationException("No JWT information (such as Authority etc.) has been passed." +
+            if (_securitySettings?.Jwt is null &&  !isDevelopmentEnvironment)
+                throw new InvalidOperationException("No JWT information (such as Authority etc.) has been passed. " +
                     "Maybe it is missing from the configuration file or not registered in the dependency injection container.");
         }
 

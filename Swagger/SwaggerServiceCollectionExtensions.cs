@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class SwaggerServiceCollectionExtensions
     {
-        public static IServiceCollection AddSwagger(this IServiceCollection services, params Type[] valueObjectAssemblyMarkerTypes)
+        public static IServiceCollection AddSwaggerAndRegisterValueObjects(this IServiceCollection services)
         {
             services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerGenOptions>();
             services.AddTransient<IConfigureOptions<SwaggerUIOptions>, ConfigureSwaggerUIOptions>();
